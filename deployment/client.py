@@ -8,6 +8,7 @@ import json
 import hashlib
 import sys
 import hashlib
+import datetime
 
 # get configurations 
 config = json.load(open(f"{os.path.dirname(os.path.abspath(__file__))}/config.json"))
@@ -25,7 +26,7 @@ REDOWNLOAD_TIME = config['redownload_times']
 # Logs messages
 def log_this(msg):
     print(msg)
-    LOG.write(msg)
+    LOG.write(f"{datetime.datetime.now()} {msg}")
     LOG.flush()
 
 # Waiting for a list of directories from the server
@@ -36,6 +37,8 @@ def wait_for_list(full_command):
     meta = f"{'':<{META_LENGTH}}".encode('utf-8')
     client_sockets[0].send(command_header + meta + full_command)
 
+    log_this(f"Client sent command: {full_command}")
+
     # Keep trying to recieve until client recieved returns from the server
     while True:
         try:
@@ -44,7 +47,7 @@ def wait_for_list(full_command):
 
             # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
             if not len(header):
-                print('Connection closed by the server')
+                log_this(f"Connection closed by the server")
                 sys.exit()
 
             # Convert header to int value
@@ -68,7 +71,7 @@ def wait_for_list(full_command):
         except IOError as e:
 
             if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
-                print('Reading error: {}'.format(str(e)))
+                log_this('Reading error: {}'.format(str(e)))
                 sys.exit()
 
             # We just did not receive anything
@@ -76,7 +79,7 @@ def wait_for_list(full_command):
 
         except Exception as e:
             # Any other exception - something happened, exit
-            print('Reading error: '.format(str(e)))
+            log_this('Reading error: '.format(str(e)))
             sys.exit()
 
 # waiting function for parallelized/serial file download
@@ -87,6 +90,8 @@ def parallelize_wait_for_file_download(client_socket, files):
     command_header = f"{len(full_command):<{HEADER_LENGTH}}".encode('utf-8')
     meta = f"{'':<{META_LENGTH}}".encode('utf-8')
     client_socket.send(command_header + meta + full_command)
+
+    log_this(f"Client sent command: {full_command}")
 
     # open files
     fds = [open(f"{os.path.dirname(os.path.abspath(__file__))}/{DOWNLOAD_FOLDER_NAME}/{files[i]}",'w') for i in range(len(files))]
@@ -104,7 +109,7 @@ def parallelize_wait_for_file_download(client_socket, files):
 
             # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
             if not len(header):
-                print('Connection closed by the server')
+                log_this('Connection closed by the server')
                 sys.exit()
             
             # Convert header to int value
@@ -120,7 +125,7 @@ def parallelize_wait_for_file_download(client_socket, files):
 
             # if there is any error, remove all files
             if meta[0] == 'ERROR':
-                print(line)
+                log_this(line)
                 
                 for i in range(len(files)):
                     fds[i].flush()
@@ -156,10 +161,9 @@ def parallelize_wait_for_file_download(client_socket, files):
 
                 if redownload_count < REDOWNLOAD_TIME:
                     redownload_count += 1
-                    print(redownload_count)
                     continue
                 
-                print('Reading error: {}'.format(str(e)))
+                log_this('Reading error: {}'.format(str(e)))
                 sys.exit()
 
             # We just did not receive anything
@@ -167,7 +171,7 @@ def parallelize_wait_for_file_download(client_socket, files):
 
         except Exception as e:
             # Any other exception - something happened, exit
-            print('Reading error: {}'.format(str(e)))
+            log_this('Reading error: {}'.format(str(e)))
             sys.exit()
 
 # Waiting for the file contents from the server
@@ -176,7 +180,7 @@ def wait_for_file_download(full_command, files):
 
     if parameters[0] == '-p':
         if len(parameters) == 1:
-            print("ParameterError: Too less parameters")
+            log_this("ParameterError: Too less parameters")
             return
         else:
             parallelize = True
@@ -214,49 +218,99 @@ def help():
     print("quit - exits client interface\n")
 
 if __name__ == "__main__":
-    # Create list of sockets connection
-    client_sockets = []
-
-    # create username to connect to the server
-    my_username = input("Username: ")
-    username = my_username.encode('utf-8')
-    username_header = f"{len(username):<{HEADER_LENGTH}}".encode('utf-8')
-    meta = f"{'':<{META_LENGTH}}".encode('utf-8')
-
-    for i in range(len(THREAD_PORTS)):
-        temp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        temp.connect((IP, THREAD_PORTS[i]))
-        temp.setblocking(False)
-
-        # Initialize conneciton with the server
-        temp.send(username_header + meta + username)
-        client_sockets.append(temp)
     
-    # Print verbose client shell begins
-    help()
+    if len(sys.argv) == 0:
+        # Create list of sockets connection
+        client_sockets = []
 
-    # Does Client Things
-    while True:
+        # create username to connect to the server
+        my_username = input("Username: ")
+        username = my_username.encode('utf-8')
+        username_header = f"{len(username):<{HEADER_LENGTH}}".encode('utf-8')
+        meta = f"{'':<{META_LENGTH}}".encode('utf-8')
 
-        # Wait for user to input a command
-        full_command = input(f'{my_username} > ').strip()
-        command = full_command.split(' ')[0]
-        parameters = full_command.split(' ')[1:]
+        for i in range(len(THREAD_PORTS)):
+            temp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            temp.connect((IP, THREAD_PORTS[i]))
+            temp.setblocking(False)
 
-        if command == "download":
-            if len(parameters) != 0:
-                wait_for_file_download(full_command, parameters)
-            else:
-                print("ParameterError: Too less parameters")
-
-        elif command == "get_files_list":
-            if len(parameters) == 0:
-                wait_for_list(full_command)
-            else:
-                print("ParameterError: Too many parameters")
-
-        elif command == "help":
-            help()
+            # Initialize conneciton with the server
+            temp.send(username_header + meta + username)
+            client_sockets.append(temp)
         
-        elif command == "quit":
-            sys.exit()
+        # Print verbose client shell begins
+        help()
+
+        # Does Client Things
+        while True:
+
+            # Wait for user to input a command
+            full_command = input(f'{my_username} > ').strip()
+            command = full_command.split(' ')[0]
+            parameters = full_command.split(' ')[1:]
+
+            if command == "download":
+                if len(parameters) != 0:
+                    wait_for_file_download(full_command, parameters)
+                else:
+                    
+                    log_this("ParameterError: Too less parameters")
+
+            elif command == "get_files_list":
+                if len(parameters) == 0:
+                    wait_for_list(full_command)
+                else:
+                    log_this("ParameterError: Too many parameters")
+
+            elif command == "help":
+                help()
+            
+            elif command == "quit":
+                sys.exit()
+    else:
+        #Args
+        #python client.py username command1 command2 ... commandn
+
+        # Create list of sockets connection
+        client_sockets = []
+
+        # create username to connect to the server
+        my_username = sys.argv[0]
+        username = my_username.encode('utf-8')
+        username_header = f"{len(username):<{HEADER_LENGTH}}".encode('utf-8')
+        meta = f"{'':<{META_LENGTH}}".encode('utf-8')
+
+        for i in range(len(THREAD_PORTS)):
+            temp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            temp.connect((IP, THREAD_PORTS[i]))
+            temp.setblocking(False)
+
+            # Initialize conneciton with the server
+            temp.send(username_header + meta + username)
+            client_sockets.append(temp)
+
+        # Does Client Things
+        for i in sys.argv[1:]:
+
+            # Wait for user to input a command
+            full_command = i
+            command = full_command.split(' ')[0]
+            parameters = full_command.split(' ')[1:]
+
+            if command == "download":
+                if len(parameters) != 0:
+                    wait_for_file_download(full_command, parameters)
+                else:
+                    log_this("ParameterError: Too less parameters")
+
+            elif command == "get_files_list":
+                if len(parameters) == 0:
+                    wait_for_list(full_command)
+                else:
+                    log_this("ParameterError: Too many parameters")
+
+            elif command == "help":
+                help()
+            
+            elif command == "quit":
+                sys.exit()

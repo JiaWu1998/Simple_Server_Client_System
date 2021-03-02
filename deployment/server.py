@@ -22,7 +22,7 @@ WATCH_FOLDER_NAME = config['server']['watch_folder_name']
 # Logs messages
 def log_this(msg):
     print(msg)
-    LOG.write(msg)
+    LOG.write(f"{datetime.datetime.now()} {msg}")
     LOG.flush()
 
 # Handles command receiving
@@ -83,6 +83,8 @@ def send_files(client_socket, files):
                     line_header = f"{len(line):<{HEADER_LENGTH}}".encode('utf-8')
                     meta = f"{f'END {i}':<{META_LENGTH}}".encode('utf-8')
                     client_socket.send(line_header + meta + line)
+
+                    log_this(f"{files[i]} was sent to {clients[client_socket]['data']}")
                     break
                 
                 line = line.encode('utf-8')
@@ -121,7 +123,7 @@ if __name__ == "__main__":
     # List of connected clients - socket as a key, user header and name as data
     clients = {}
 
-    print(f'Listening for connections on {IP}:{PORT}...')
+    log_this(f'Listening for connections on {IP}:{PORT}...')
 
     # Does Server Things
     while True:
@@ -148,7 +150,7 @@ if __name__ == "__main__":
                 clients[client_socket] = user
 
                 # logging 
-                log_msg = '{} Accepted new connection from {}:{}, username: {}\n'.format(datetime.datetime.now(), *client_address, user['data'].decode('utf-8'))
+                log_msg = 'Accepted new connection from {}:{}, username: {}\n'.format(*client_address, user['data'].decode('utf-8'))
                 log_this(log_msg)
             
             # Else existing socket is sending a command
