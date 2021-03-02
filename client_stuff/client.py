@@ -10,7 +10,7 @@ import sys
 import hashlib
 
 # get configurations 
-config = json.load(open(os.path.realpath(__file__)+"/../"+"config.json"))
+config = json.load(open(os.path.dirname(os.path.abspath(__file__))+"/"+"config.json"))
 
 IP = config['client']['ip_address']
 PORT = config['client']['server_port']
@@ -18,7 +18,7 @@ HEADER_LENGTH = config['header_length']
 META_LENGTH = config['meta_length']
 NUM_THREAD_SOCKETS = config['thread_sockets']['num_thread_sockets']
 THREAD_PORTS = [PORT] + config['thread_sockets']['ports']
-LOG = open(os.path.realpath(__file__)+"/../"+config['client']['log_file'], "a")
+LOG = open(os.path.dirname(os.path.abspath(__file__))+"/"+config['client']['log_file'], "a")
 DOWNLOAD_FOLDER_NAME = config['client']['download_folder_name']
 REDOWNLOAD_TIME = config['redownload_times']
 
@@ -89,7 +89,7 @@ def parallelize_wait_for_file_download(client_socket, files):
     client_socket.send(command_header + meta + full_command)
 
     # open files
-    fds = [open(os.path.realpath(__file__)+"\..\\"+DOWNLOAD_FOLDER_NAME+"\\"+files[i],'w') for i in range(len(files))]
+    fds = [open(os.path.dirname(os.path.abspath(__file__))+"/"+DOWNLOAD_FOLDER_NAME+"/"+files[i],'w') for i in range(len(files))]
     files_closed = 0
     redownload_count = 0
 
@@ -125,7 +125,7 @@ def parallelize_wait_for_file_download(client_socket, files):
                 for i in range(len(files)):
                     fds[i].flush()
                     fds[i].close()
-                    os.remove(os.path.realpath(__file__)+"\..\\"+files[i])
+                    os.remove(os.path.dirname(os.path.abspath(__file__))+"/"+files[i])
                 break
             
             # Flush and close and files is finished recieving
@@ -138,7 +138,7 @@ def parallelize_wait_for_file_download(client_socket, files):
                 if m[int(meta[1])].hexdigest() != line:
                     log_this(f"Incorrect checksum for file : {files[int(meta[1])]}")
                     log_this(f"Deleting file : {files[int(meta[1])]}")
-                    os.remove(os.path.realpath(__file__)+"\..\\"+files[int(meta[1])])
+                    os.remove(os.path.dirname(os.path.abspath(__file__))+"/"+files[int(meta[1])])
  
             # continue to write and flush to files
             else:

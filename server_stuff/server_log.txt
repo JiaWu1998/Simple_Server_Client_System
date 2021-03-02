@@ -841,3 +841,19 @@
 2021-03-01 19:08:25.381931 Closed connection from: dd
 2021-03-01 19:08:25.384930 Closed connection from: dd
 2021-03-01 19:08:25.386937 Closed connection from: dd
+2021-03-01 19:58:46.506677 Accepted new connection from 127.0.0.1:50679, username: hon
+2021-03-01 19:58:46.507178 Accepted new connection from 127.0.0.1:50680, username: hon
+2021-03-01 19:58:46.507580 Accepted new connection from 127.0.0.1:50681, username: hon
+2021-03-01 19:58:46.507797 Accepted new connection from 127.0.0.1:50682, username: hon
+2021-03-01 19:58:46.508051 Accepted new connection from 127.0.0.1:50683, username: hon
+2021-03-01 19:58:46.508202 Accepted new connection from 127.0.0.1:50684, username: hon
+2021-03-01 19:58:46.508264 Accepted new connection from 127.0.0.1:50685, username: hon
+2021-03-01 19:58:46.508318 Accepted new connection from 127.0.0.1:50686, username: hon
+2021-03-01 19:58:46.508466 Accepted new connection from 127.0.0.1:50687, username: hon
+2021-03-01 19:58:46.508554 Accepted new connection from 127.0.0.1:50688, username: hon
+2021-03-01 19:58:46.508683 Accepted new connection from 127.0.0.1:50689, username: hon
+2021-03-01 19:58:55.043751 Received command from hon: get_files_list
+2021-03-01 19:59:09.364549 Received command from hon: download
+2021-03-01 19:59:30.503414 Received command from hon: download
+2021-03-01 19:59:55.976271 Received command from hon: download
+2021-03-01 19:59:55.976696 Received command from hon: download
