@@ -156,8 +156,9 @@ def parallelize_wait_for_file_download(client_socket, files):
 
                 if redownload_count < REDOWNLOAD_TIME:
                     redownload_count += 1
+                    print(redownload_count)
                     continue
-
+                
                 print('Reading error: {}'.format(str(e)))
                 sys.exit()
 
@@ -166,7 +167,7 @@ def parallelize_wait_for_file_download(client_socket, files):
 
         except Exception as e:
             # Any other exception - something happened, exit
-            print('Reading error: '.format(str(e)))
+            print('Reading error: {}'.format(str(e)))
             sys.exit()
 
 # Waiting for the file contents from the server
