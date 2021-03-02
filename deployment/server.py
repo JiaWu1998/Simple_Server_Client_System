@@ -8,7 +8,7 @@ import hashlib
 
 
 # get configurations
-config = json.load(open(os.path.dirname(os.path.abspath(__file__))+"/"+"config.json"))
+config = json.load(open(f"{os.path.dirname(os.path.abspath(__file__))}/config.json"))
 
 IP = config['server']['ip_address']
 PORT = config['server']['port']
@@ -16,7 +16,7 @@ HEADER_LENGTH = config['header_length']
 META_LENGTH = config['meta_length']
 NUM_THREAD_SOCKETS = config['thread_sockets']['num_thread_sockets']
 THREAD_PORTS = [PORT] + config['thread_sockets']['ports']
-LOG = open(os.path.dirname(os.path.abspath(__file__))+"/"+config['server']['log_file'], "a")
+LOG = open(f"{os.path.dirname(os.path.abspath(__file__))}/{config['server']['log_file']}", "a")
 WATCH_FOLDER_NAME = config['server']['watch_folder_name']
 
 # Logs messages
@@ -54,7 +54,7 @@ def receive_command(client_socket):
 # Sends file directory to client
 def send_file_directory(client_socket):
     try:
-        list_of_dir = os.listdir(os.path.dirname(os.path.abspath(__file__))+'/'+WATCH_FOLDER_NAME+'/')
+        list_of_dir = os.listdir(f"{os.path.dirname(os.path.abspath(__file__))}/{WATCH_FOLDER_NAME}/")
         list_of_dir = '\n'.join(list_of_dir).encode('utf-8')
         list_of_dir_header = f"{len(list_of_dir):<{HEADER_LENGTH}}".encode('utf-8')
         meta = f"{'':<{META_LENGTH}}".encode('utf-8')
@@ -67,7 +67,7 @@ def send_file_directory(client_socket):
 # Sends file to the client
 def send_files(client_socket, files):
     try:
-        fds = [open(os.path.dirname(os.path.abspath(__file__))+"/"+WATCH_FOLDER_NAME+"/"+files[i],'r') for i in range(len(files))]
+        fds = [open(f"{os.path.dirname(os.path.abspath(__file__))}/{WATCH_FOLDER_NAME}/{files[i]}",'r') for i in range(len(files))]
         
         for i in range(len(files)):
             # using md5 checksum
