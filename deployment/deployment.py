@@ -115,7 +115,7 @@ def evaluation_2():
 # Evaluation 3: Graph parallelized download speeds of all testload files for 2, 4, 8, 16 clients in parallel
 def evaluation_3():
     # Test N clients at a time
-    N_list = [2, 4, 8, 16]
+    N_list = [2, 4, 8]
 
     # Average Time results
     avg_results = [0 for _ in range(len(N_list))]
