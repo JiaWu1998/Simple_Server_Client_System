@@ -208,6 +208,14 @@ def wait_for_file_download(full_command, files):
     end = time.time()
     print(f"Time: {end - start}")
 
+    # For data collection
+    parent_dir = os.path.dirname(os.path.abspath(__file__))
+    results_file = open(f"{parent_dir}/../results/results.txt", 'a')
+    # results_file.write(f"{parent_dir},{(end-start)*1000} ms\n")
+    results_file.write(f"{(end-start)*1000}\n")
+
+
+
 # Verbose function
 def help():
     print("\n*** INFO ON FUNCTIONS ***\n")
