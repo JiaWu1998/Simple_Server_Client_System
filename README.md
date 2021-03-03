@@ -10,7 +10,7 @@ To run a sample server/client do the following:
 4. choose the other terminal and type 'python3 client_0/client.py'
 5. choose a username for the client terminal and continue with the help of the manual from the client terminal
 6. when you are done, type 'make clean'
-*NOTE: All log files are in server and client folders. If you do a "make clean", it would be wiped out along with the server and client folders
+* NOTE: All log files are in server and client folders. If you do a "make clean", it would be wiped out along with the server and client folders
 
 To run evaluation 1 do the following:
 1. type 'make eval_1'
