@@ -212,7 +212,6 @@ def evaluation_4():
             avg_results[n] += float(l)
         linecount = i + 1
 
-        print(linecount)
         avg_results[n] /= float(linecount)
         f.close()
         open(f"{PARENT_DIR}/../results/results.txt", 'w').close()
@@ -230,24 +229,24 @@ def evaluation_4():
 
 
 if __name__ == "__main__":
-    if sys.argv[0] == "-1":
+    if sys.argv[1] == "-1":
         evaluation_1()
-    elif sys.argv[0] == "-2":
+    elif sys.argv[1] == "-2":
         evaluation_2()
-    elif sys.argv[0] == "-3":
+    elif sys.argv[1] == "-3":
         evaluation_3()
-    elif sys.argv[0] == "-4":
+    elif sys.argv[1] == "-4":
         evaluation_4()
-    elif sys.argv[0] == "-c" and len(sys.argv) == 2:
+    elif sys.argv[1] == "-c" and len(sys.argv) == 3:
         try: 
-            N = int(sys.argv[1])
+            N = int(sys.argv[2])
             create_server()
             create_clients(N)
         except Exception as e:
             print(e)
-    elif sys.argv[0] == "-d" and len(sys.argv) == 2:
+    elif sys.argv[1] == "-d" and len(sys.argv) == 3:
         try:
-            N = int(sys.argv[1])
+            N = int(sys.argv[2])
             delete_server()
             delete_clients(N)
         except Exception as e:
