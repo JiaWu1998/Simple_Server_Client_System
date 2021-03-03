@@ -1,6 +1,6 @@
 # Simple_Server_Client_System
 
-This project is a client-server mode file downloading system. A server will hosts a list of files which clients can download. In addition to the downloading capabilities, the client can also view the list of files that the server has to offer. This system is also good for multiple requests from multiple clients. 
+This project is a client-server mode file downloading system. A server will host a list of files clients can download. In addition to the downloading capabilities, the client can also view the list of files that the server has to offer. This system is also good for multiple requests from multiple clients. 
 
 
 To run a sample server/client do the following:
