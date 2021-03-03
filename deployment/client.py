@@ -48,7 +48,7 @@ def wait_for_list(full_command):
             # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
             if not len(header):
                 log_this(f"Connection closed by the server")
-                sys.exit()
+                return
 
             # Convert header to int value
             header = int(header.decode('utf-8').strip())
@@ -72,7 +72,7 @@ def wait_for_list(full_command):
 
             if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
                 log_this('Reading error: {}'.format(str(e)))
-                sys.exit()
+                return
 
             # We just did not receive anything
             continue
@@ -80,7 +80,7 @@ def wait_for_list(full_command):
         except Exception as e:
             # Any other exception - something happened, exit
             log_this('Reading error: '.format(str(e)))
-            sys.exit()
+            return
 
 # waiting function for parallelized/serial file download
 def parallelize_wait_for_file_download(client_socket, files):
@@ -110,7 +110,7 @@ def parallelize_wait_for_file_download(client_socket, files):
             # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
             if not len(header):
                 log_this('Connection closed by the server')
-                sys.exit()
+                return
             
             # Convert header to int value
             header = int(header.decode('utf-8').strip())
@@ -164,7 +164,7 @@ def parallelize_wait_for_file_download(client_socket, files):
                     continue
                 
                 log_this('Reading error: {}'.format(str(e)))
-                sys.exit()
+                return 
 
             # We just did not receive anything
             continue
@@ -172,7 +172,7 @@ def parallelize_wait_for_file_download(client_socket, files):
         except Exception as e:
             # Any other exception - something happened, exit
             log_this('Reading error: {}'.format(str(e)))
-            sys.exit()
+            return
 
 # Waiting for the file contents from the server
 def wait_for_file_download(full_command, files):
