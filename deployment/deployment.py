@@ -1,7 +1,8 @@
 import os
 import shutil
-from subprocess import Popen, PIPE, STDOUT, call
+from subprocess import Popen, PIPE
 import time
+import matplotlib.pyplot as plt
 
 # Test File Load Sizes
 TEST_LOAD_SIZES = [128,512,2000,8000,32000]
@@ -65,7 +66,8 @@ def evaluation_1():
     client_process = Popen(['python','client.py','Mr.0',f"download load_{TEST_LOAD_SIZES[-1]}", "quit"], stdout=PIPE, stdin=PIPE, stderr=PIPE, cwd=f"{PARENT_DIR}/../client_0")
     
     # get download confirmation from client before checking
-    time.sleep(3)
+    time.sleep(10)
+    client_process.wait()
 
     if os.path.exists(f"{PARENT_DIR}/../client_0/download_folder/load_{TEST_LOAD_SIZES[-1]}"):
         print("Evaluation 1 passed.")
@@ -96,6 +98,8 @@ def evaluation_2():
 
     # get download confirmation from client before checking
     time.sleep(10)
+    for i in range(N):
+        client_processes[i].wait()
 
     checks = 0
     for i in range(N):
@@ -115,13 +119,13 @@ def evaluation_2():
 # Evaluation 3: Graph parallelized download speeds of all testload files for 2, 4, 8, 16 clients in parallel
 def evaluation_3():
     # Test N clients at a time
-    N_list = [2, 4, 8]
+    N_list = [2,4,8,16]
 
     # Average Time results
     avg_results = [0 for _ in range(len(N_list))]
 
     # repeats to get average time
-    repeat = 3
+    repeat = 1
 
     # Set up server
     create_server()
@@ -129,18 +133,77 @@ def evaluation_3():
     server_process = Popen(['python','server.py'], stdout=PIPE, stdin=PIPE, stderr=PIPE, cwd=f"{PARENT_DIR}/../server")    
     
     for n in range(len(N_list)):
+        create_clients(N_list[n])
+        client_processes = [None for _ in range(N_list[n])]
+
         for _ in range(repeat):
-            create_clients(N_list[n])
-            client_processes = [None for _ in range(N_list[n])]
 
             for i in range(N_list[n]):
                 temp_string = " ".join(["load_"+str(t) for t in TEST_LOAD_SIZES])
                 client_processes[i] = Popen(['python','client.py','Mr.{i}',f"download -p {temp_string}", "quit"], stdout=PIPE, stdin=PIPE, stderr=PIPE, cwd=f"{PARENT_DIR}/../client_{i}")
 
             # wait for downloads to finish
-            time.sleep(10*n)
-            delete_clients(N_list[n])
+            time.sleep(10)
+            for i in range(N_list[n]):
+                client_processes[i].wait()
+            
         
+        f = open(f"{PARENT_DIR}/../results/results.txt",'r')
+        linecount = 0
+        for i, l in enumerate(f):
+            avg_results[n] += float(l)
+        linecount = i + 1
+
+        avg_results[n] /= float(linecount)
+        f.close()
+        open(f"{PARENT_DIR}/../results/results.txt", 'w').close()
+
+        delete_clients(N_list[n])
+
+    # f = open(f"{PARENT_DIR}/../results/graph.txt",'w')
+    # f.write(str(avg_results))
+    # f.close()
+    
+    delete_server()
+    plt.plot(N_list,avg_results)
+    plt.title('Parallerized Download Performance through Scaling Numbers of Clients')
+    plt.xlabel('Number of Clients Connected To Server')
+    plt.ylabel('Parallerized Download Time (ms)')
+    plt.savefig(f"{PARENT_DIR}/../results/eval3.png")
+
+    print("Evaluation 3 passed. Check /results/eval3.png for graph")
+
+# Evaluation 4: Graph download speeds of each individual testload files for 4 clients in parallel
+def evaluation_4():
+    N = 4
+
+    # Average Time results
+    avg_results = [0 for _ in range(len(TEST_LOAD_SIZES))]
+
+    # repeats to get average time
+    repeat = 1
+
+    # Set up server and clients
+    create_server()
+    create_test_loads()
+
+    # start server and client and check
+    server_process = Popen(['python','server.py'], stdout=PIPE, stdin=PIPE, stderr=PIPE, cwd=f"{PARENT_DIR}/../server")    
+    
+    for n in range(len(TEST_LOAD_SIZES)):
+        create_clients(N)
+
+        client_processes = [None for _ in range(N)]
+
+        for _ in range(repeat):
+            for i in range(N):
+                client_processes[i] = Popen(['python','client.py','Mr.{i}',f"download load_{TEST_LOAD_SIZES[n]}", "quit"], stdout=PIPE, stdin=PIPE, stderr=PIPE, cwd=f"{PARENT_DIR}/../client_{i}")
+            
+            # wait for downloads to finish
+            # time.sleep(10)
+            for i in range(N):
+                client_processes[i].wait()
+
         f = open(f"{PARENT_DIR}/../results/results.txt",'r')
         linecount = 0
         for i, l in enumerate(f):
@@ -152,21 +215,21 @@ def evaluation_3():
         f.close()
         open(f"{PARENT_DIR}/../results/results.txt", 'w').close()
 
-    print(avg_results)
-    
-    
-    
-
-
-
-
+        delete_clients(N)
 
     delete_server()
+    plt.plot(TEST_LOAD_SIZES,avg_results)
+    plt.title('Download Performance through Scaling File Size')
+    plt.xlabel('Size of Files (btyes)')
+    plt.ylabel('Download Time (ms)')
+    plt.savefig(f"{PARENT_DIR}/../results/eval4.png")
 
-    
+    print("Evaluation 4 passed. Check /results/eval4.png for graph")
+
 
 if __name__ == "__main__":
-    # evaluation_1()
-    # evaluation_2()
+    evaluation_1()
+    evaluation_2()
     evaluation_3()
-    
+    evaluation_4()
+    pass
