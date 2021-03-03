@@ -3,6 +3,7 @@ import shutil
 from subprocess import Popen, PIPE
 import time
 import matplotlib.pyplot as plt
+import sys
 
 # Test File Load Sizes
 TEST_LOAD_SIZES = [128,512,2000,8000,32000]
@@ -97,7 +98,7 @@ def evaluation_2():
         client_processes[i] = Popen(['python','client.py','Mr.{i}',f"download load_{TEST_LOAD_SIZES[-1]}", "quit"], stdout=PIPE, stdin=PIPE, stderr=PIPE, cwd=f"{PARENT_DIR}/../client_{i}")
 
     # get download confirmation from client before checking
-    time.sleep(10)
+    time.sleep(15)
     for i in range(N):
         client_processes[i].wait()
 
@@ -106,6 +107,7 @@ def evaluation_2():
         if os.path.exists(f"{PARENT_DIR}/../client_{i}/download_folder/load_{TEST_LOAD_SIZES[-1]}"):
             checks += 1
 
+    print(f"checks for eval 2 {checks}")
     if checks == N:
         print("Evaluation 2 passed.")
     else:
@@ -200,7 +202,7 @@ def evaluation_4():
                 client_processes[i] = Popen(['python','client.py','Mr.{i}',f"download load_{TEST_LOAD_SIZES[n]}", "quit"], stdout=PIPE, stdin=PIPE, stderr=PIPE, cwd=f"{PARENT_DIR}/../client_{i}")
             
             # wait for downloads to finish
-            # time.sleep(10)
+            time.sleep(10)
             for i in range(N):
                 client_processes[i].wait()
 
@@ -228,8 +230,27 @@ def evaluation_4():
 
 
 if __name__ == "__main__":
-    evaluation_1()
-    evaluation_2()
-    evaluation_3()
-    evaluation_4()
+    if sys.argv[0] == "-1":
+        evaluation_1()
+    elif sys.argv[0] == "-2":
+        evaluation_2()
+    elif sys.argv[0] == "-3":
+        evaluation_3()
+    elif sys.argv[0] == "-4":
+        evaluation_4()
+    elif sys.argv[0] == "-c" and len(sys.argv) == 2:
+        try: 
+            N = int(sys.argv[1])
+            create_server()
+            create_clients(N)
+        except Exception as e:
+            print(e)
+    elif sys.argv[0] == "-d" and len(sys.argv) == 2:
+        try:
+            N = int(sys.argv[1])
+            delete_server()
+            delete_clients(N)
+        except Exception as e:
+            print(e)
+
     pass
